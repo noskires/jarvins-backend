@@ -9,6 +9,9 @@ use DataTables;
 use Auth;
 use JWTAuth;
 
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class UserController extends Controller
 {
 
@@ -61,7 +64,7 @@ class UserController extends Controller
 
     function me() {
 
-        $this->user = JWTAuth::parseToken()->authenticate();
+        return $this->user = JWTAuth::parseToken()->authenticate();
 
         // try {
         //     if(Auth::check()) {
@@ -75,5 +78,10 @@ class UserController extends Controller
         //     return response()->json(['message' => 'Error'], 500);
         // }
         
+    }
+
+    public function export() 
+    {
+        return Excel::download(new UsersExport, 'users.xlsx');
     }
 }

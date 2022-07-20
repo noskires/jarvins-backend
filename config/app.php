@@ -167,6 +167,9 @@ return [
         /*
          * Package Service Providers...
          */
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+        Altek\Accountant\AccountantServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -176,9 +179,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
         
-
     ],
 
     /*
@@ -236,6 +237,7 @@ return [
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
     ],
 

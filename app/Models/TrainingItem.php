@@ -6,18 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Site extends Model implements Auditable{
+class TrainingItem extends Model implements Auditable{
 
     use \OwenIt\Auditing\Auditable;
 
     use HasFactory;
 
     protected $primaryKey = 'id';
-    protected $table = "sites";
+    protected $table = "training_items";
 
-    protected $casts = [
-        'longitude' => 'float',
-        'latitude' => 'float'
-    ];
-    
+    // protected $dates = ['start_date'];
 }

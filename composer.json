@@ -6,13 +6,18 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "altek/accountant": "^3.0",
+        "altek/eventually": "^2.0",
+        "bkintanar/psgc-api-wrapper": "^0.6.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravelista/lumen-vendor-publish": "^8.0",
+        "maatwebsite/excel": "^3.1",
         "owen-it/laravel-auditing": "^13.0",
+        "spatie/laravel-permission": "^5.5",
         "tymon/jwt-auth": "*",
         "yajra/laravel-datatables-oracle": "~9.0"
     },

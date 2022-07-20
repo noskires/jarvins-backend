@@ -5,7 +5,23 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\TrainingItemController;
+use App\Http\Controllers\ToolsTestEquipmentController;
+use App\Http\Controllers\ServiceVehicleController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\BuildingController;
+use App\Http\Controllers\ExchangeController;
+use App\Http\Controllers\SiteCategoryController;
+use App\Http\Controllers\ElectricCompanyController;
+use App\Http\Controllers\PssOwnerController;
+use App\Http\Controllers\GeoController;
+use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\NetworkElementController;
+use App\Http\Controllers\BatteryController;
+use App\Http\Controllers\RectifierController;
+use App\Http\Controllers\RectifierItemController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,18 +48,8 @@ Route::group([
     Route::post('/users2', [UserController::class, 'list']);
     Route::post('/update', [UserController::class, 'update']);
 
-    // Employee
-    Route::get('/employee', [EmployeeController::class, 'findOne']);
-    Route::post('/employees', [EmployeeController::class, 'getAll']);
-    Route::post('/employee/save', [EmployeeController::class, 'store']);
-    Route::post('/employee/update', [EmployeeController::class, 'update']);
-    Route::post('/employee/delete', [EmployeeController::class, 'remove']); 
-
-    Route::get('/select2', function()
-    {
-    $data = ['ajay', 'therichpost', 'angular9', 'laravel7', 'restapi'];
-    return Response::json($data, 200);
-    });
+    
+    Route::get('/export', [UserController::class, 'export']);
 
 });
 
@@ -54,10 +60,65 @@ Route::group([
 ], function ($router) {
 
     Route::get('/v1/employee', [EmployeeController::class, 'findOne']);
+    Route::get('/v1/employee/select2', [EmployeeController::class, 'getAllSelect2']);
     Route::post('/v1/employee/list', [EmployeeController::class, 'getAll']);
     Route::post('/v1/employee/save', [EmployeeController::class, 'store']);
     Route::post('/v1/employee/update', [EmployeeController::class, 'update']);
     Route::post('/v1/employee/delete', [EmployeeController::class, 'remove']);
+
+    Route::get('/v1/employee/export', [EmployeeController::class, 'export']);
+
+    Route::get('/v1/employee/select2-aurora', [EmployeeController::class, 'select2Aurora']);
+
+    Route::post('/v1/employee/roles-permission', [EmployeeController::class, 'createAndAssignRoles']);
+    Route::post('/v1/employee/get-roles', [EmployeeController::class, 'getRoles']);
+
+});
+
+// Employee > Trainings
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/training', [TrainingController::class, 'findOne']);
+    Route::post('/v1/training/list', [TrainingController::class, 'getAll']);
+    Route::post('/v1/training/save', [TrainingController::class, 'store']);
+    Route::post('/v1/training/update', [TrainingController::class, 'update']);
+    Route::post('/v1/training/delete', [TrainingController::class, 'remove']);
+
+    Route::get('/v1/training-history', [TrainingItemController::class, 'findOne']);
+    Route::post('/v1/training-history/list', [TrainingItemController::class, 'getAll']);
+    Route::post('/v1/training-history/save', [TrainingItemController::class, 'store']);
+    Route::post('/v1/training-history/update', [TrainingItemController::class, 'update']);
+    Route::post('/v1/training-history/delete', [TrainingItemController::class, 'remove']);
+
+    Route::get('/v1/training-history/employee-list', [TrainingItemController::class, 'employeeList']);
+
+});
+
+// Employee > TTE
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/tte', [ToolsTestEquipmentController::class, 'findOne']);
+    Route::post('/v1/tte/list', [ToolsTestEquipmentController::class, 'getAll']);
+    Route::post('/v1/tte/save', [ToolsTestEquipmentController::class, 'store']);
+    Route::post('/v1/tte/update', [ToolsTestEquipmentController::class, 'update']);
+    Route::post('/v1/tte/delete', [ToolsTestEquipmentController::class, 'remove']);
+
+});
+
+// Employee > SV
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/sv', [ServiceVehicleController::class, 'findOne']);
+    Route::post('/v1/sv/list', [ServiceVehicleController::class, 'getAll']);
+    Route::post('/v1/sv/save', [ServiceVehicleController::class, 'store']);
+    Route::post('/v1/sv/update', [ServiceVehicleController::class, 'update']);
+    Route::post('/v1/sv/delete', [ServiceVehicleController::class, 'remove']);
 
 });
 
@@ -71,6 +132,143 @@ Route::group([
     Route::post('/v1/site/save', [SiteController::class, 'store']);
     Route::post('/v1/site/update', [SiteController::class, 'update']);
     Route::post('/v1/site/delete', [SiteController::class, 'remove']);
+
+});
+
+// Network Elements
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/ne', [NetworkElementController::class, 'findOne']);
+    Route::get('/v1/ne/select2', [NetworkElementController::class, 'getAllSelect2']);
+    Route::post('/v1/ne/select2', [NetworkElementController::class, 'getAllSelect2']);
+    Route::post('/v1/ne/list', [NetworkElementController::class, 'getAll']);
+    Route::post('/v1/ne/save', [NetworkElementController::class, 'store']);
+    Route::post('/v1/ne/update', [NetworkElementController::class, 'update']);
+    Route::post('/v1/ne/delete', [NetworkElementController::class, 'remove']);
+
+});
+
+// Support Facilities > Battery
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/battery', [BatteryController::class, 'findOne']);
+    Route::get('/v1/battery/select2', [BatteryController::class, 'getAllSelect2']);
+    Route::post('/v1/battery/list', [BatteryController::class, 'getAll']);
+    Route::post('/v1/battery/save', [BatteryController::class, 'store']);
+    Route::post('/v1/battery/update', [BatteryController::class, 'update']);
+    Route::post('/v1/battery/delete', [BatteryController::class, 'remove']);
+
+});
+
+// Support Facilities > Rectifier
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/rectifier', [RectifierController::class, 'findOne']);
+    Route::get('/v1/rectifier/select2', [RectifierController::class, 'getAllSelect2']);
+    Route::post('/v1/rectifier/select2', [RectifierController::class, 'getAllSelect2']);
+    Route::post('/v1/rectifier/list', [RectifierController::class, 'getAll']);
+    Route::post('/v1/rectifier/save', [RectifierController::class, 'store']);
+    Route::post('/v1/rectifier/update', [RectifierController::class, 'update']);
+    Route::post('/v1/rectifier/delete', [RectifierController::class, 'remove']);
+    
+    Route::get('/v1/rectifier-item', [RectifierItemController::class, 'findOne']);
+    Route::post('/v1/rectifier-item/select2', [RectifierItemController::class, 'getAllSelect2']);
+    Route::post('/v1/rectifier-item/list', [RectifierItemController::class, 'getAll']);
+    Route::post('/v1/rectifier-item/save', [RectifierItemController::class, 'store']);
+    Route::post('/v1/rectifier-item/update', [RectifierItemController::class, 'update']);
+    Route::post('/v1/rectifier-item/delete', [RectifierItemController::class, 'remove']);
+
+});
+
+// Libraries
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/building', [BuildingController::class, 'findOne']);
+    Route::get('/v1/building/select2', [BuildingController::class, 'getAllSelect2']);
+    Route::post('/v1/building/list', [BuildingController::class, 'getAll']);
+    Route::post('/v1/building/save', [BuildingController::class, 'store']);
+    Route::post('/v1/building/update', [BuildingController::class, 'update']);
+    Route::post('/v1/building/delete', [BuildingController::class, 'remove']);
+
+    Route::get('/v1/exchange', [ExchangeController::class, 'findOne']);
+    Route::get('/v1/exchange/select2', [ExchangeController::class, 'getAllSelect2']);
+    Route::post('/v1/exchange/list', [ExchangeController::class, 'getAll']);
+    Route::post('/v1/exchange/save', [ExchangeController::class, 'store']);
+    Route::post('/v1/exchange/update', [ExchangeController::class, 'update']);
+    Route::post('/v1/exchange/delete', [ExchangeController::class, 'remove']);
+
+    Route::get('/v1/site-category', [SiteCategoryController::class, 'findOne']);
+    Route::get('/v1/site-category/select2', [SiteCategoryController::class, 'getAllSelect2']);
+    Route::post('/v1/site-category/list', [SiteCategoryController::class, 'getAll']);
+    Route::post('/v1/site-category/save', [SiteCategoryController::class, 'store']);
+    Route::post('/v1/site-category/update', [SiteCategoryController::class, 'update']);
+    Route::post('/v1/site-category/delete', [SiteCategoryController::class, 'remove']);
+
+    Route::get('/v1/electric-company', [ElectricCompanyController::class, 'findOne']);
+    Route::get('/v1/electric-company/select2', [ElectricCompanyController::class, 'getAllSelect2']);
+    Route::post('/v1/electric-company/list', [ElectricCompanyController::class, 'getAll']);
+    Route::post('/v1/electric-company/save', [ElectricCompanyController::class, 'store']);
+    Route::post('/v1/electric-company/update', [ElectricCompanyController::class, 'update']);
+    Route::post('/v1/electric-company/delete', [ElectricCompanyController::class, 'remove']);
+
+    Route::get('/v1/pss-owner', [PssOwnerController::class, 'findOne']);
+    Route::get('/v1/pss-owner/select2', [PssOwnerController::class, 'getAllSelect2']);
+    Route::post('/v1/pss-owner/list', [PssOwnerController::class, 'getAll']);
+    Route::post('/v1/pss-owner/save', [PssOwnerController::class, 'store']);
+    Route::post('/v1/pss-owner/update', [PssOwnerController::class, 'update']);
+    Route::post('/v1/pss-owner/delete', [PssOwnerController::class, 'remove']);
+
+    Route::post('/v1/geo/regions/select2', [GeoController::class, 'getAllRegions']);
+    Route::post('/v1/geo/provinces/select2', [GeoController::class, 'getAllProvinces']);
+    Route::post('/v1/geo/towns/select2', [GeoController::class, 'getAllTowns']);
+    Route::post('/v1/geo/barangays/select2', [GeoController::class, 'getAllBrgys']);
+    Route::get('/v1/geo/nothing', [GeoController::class, 'getNothing']);
+
+    Route::post('/v1/organization/center/select2', [OrganizationController::class, 'getAllCenter']);
+    Route::post('/v1/organization/division/select2', [OrganizationController::class, 'getAllDivision']);
+    Route::post('/v1/organization/section/select2', [OrganizationController::class, 'getAllSection']);
+    Route::get('/v1/organization/nothing', [OrganizationController::class, 'getNothing']);
+    
+});
+
+Route::get('/regions', [EmployeeController::class, 'region']);
+
+
+Route::get('/array_diff', function(){
+// return "asdf";
+// $array1 = array("a" => "sky", "star", "moon", "cloud", "moon");
+// $array2 = array("b" => "sky", "sun", "moon");
+
+$array1 = ["1", "2", "3"];
+$array2 = ["5", "6"];
+ 
+// Comparing the values
+$result = array_diff($array2, $array1);
+// print_r($result);
+return $result;
+
+// result 1
+// $result = array_diff($array1, $array2);
+// Array
+// (
+// [0] => star
+// [2] => cloud
+// )
+
+// result 2
+// $result = array_diff($array2, $array1);
+// Array
+// (
+// [0] => sun
+// )
 
 });
 
