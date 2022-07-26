@@ -29,7 +29,7 @@ class GeoController extends Controller
         
         $collection = Geo::select(
             // 'code as id',
-            DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            'code AS id',
             'name as text',
         )
         ->where('level', 'Reg')
@@ -61,7 +61,7 @@ class GeoController extends Controller
         $training_code = null;
         
         $collection = Geo::select(
-            DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            'code AS id',
             'name as text',
         )
         // ->where('level', 'Prov')
@@ -99,7 +99,8 @@ class GeoController extends Controller
         );
 
         $collection = Geo::select(
-            DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            // DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            'code AS id',
             'name as text',
         )
         ->whereIn('level', ['Mun', 'City'])
@@ -138,7 +139,8 @@ class GeoController extends Controller
         $training_code = null;
         
         $collection = Geo::select(
-            DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            // DB::raw("CAST(code AS VARCHAR(20)) AS id"),
+            'code AS id',
             'name as text',
         )
         ->where('level', 'Bgy')

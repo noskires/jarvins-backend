@@ -21,6 +21,7 @@ use App\Http\Controllers\NetworkElementController;
 use App\Http\Controllers\BatteryController;
 use App\Http\Controllers\RectifierController;
 use App\Http\Controllers\RectifierItemController;
+use App\Http\Controllers\AuditController;
 
 /*
 |--------------------------------------------------------------------------
@@ -237,6 +238,15 @@ Route::group([
     Route::post('/v1/organization/section/select2', [OrganizationController::class, 'getAllSection']);
     Route::get('/v1/organization/nothing', [OrganizationController::class, 'getNothing']);
     
+});
+
+// Audit Logs
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::post('/v1/audit/list', [AuditController::class, 'getAll']);
+
 });
 
 Route::get('/regions', [EmployeeController::class, 'region']);
