@@ -21,6 +21,7 @@ use App\Http\Controllers\NetworkElementController;
 use App\Http\Controllers\BatteryController;
 use App\Http\Controllers\RectifierController;
 use App\Http\Controllers\RectifierItemController;
+use App\Http\Controllers\DcPanelController;
 use App\Http\Controllers\AuditController;
 
 /*
@@ -184,6 +185,28 @@ Route::group([
     Route::post('/v1/rectifier-item/save', [RectifierItemController::class, 'store']);
     Route::post('/v1/rectifier-item/update', [RectifierItemController::class, 'update']);
     Route::post('/v1/rectifier-item/delete', [RectifierItemController::class, 'remove']);
+
+});
+
+// Support Facilities > DC Panel
+Route::group([
+    'middleware' => 'api'
+], function ($router) {
+
+    Route::get('/v1/dc-panel', [DcPanelController::class, 'findOne']);
+    Route::get('/v1/dc-panel/select2', [DcPanelController::class, 'getAllSelect2']);
+    Route::post('/v1/dc-panel/select2', [DcPanelController::class, 'getAllSelect2']);
+    Route::post('/v1/dc-panel/list', [DcPanelController::class, 'getAll']);
+    Route::post('/v1/dc-panel/save', [DcPanelController::class, 'store']);
+    Route::post('/v1/dc-panel/update', [DcPanelController::class, 'update']);
+    Route::post('/v1/dc-panel/delete', [DcPanelController::class, 'remove']);
+    
+    // Route::get('/v1/rectifier-item', [RectifierItemController::class, 'findOne']);
+    // Route::post('/v1/rectifier-item/select2', [RectifierItemController::class, 'getAllSelect2']);
+    // Route::post('/v1/rectifier-item/list', [RectifierItemController::class, 'getAll']);
+    // Route::post('/v1/rectifier-item/save', [RectifierItemController::class, 'store']);
+    // Route::post('/v1/rectifier-item/update', [RectifierItemController::class, 'update']);
+    // Route::post('/v1/rectifier-item/delete', [RectifierItemController::class, 'remove']);
 
 });
 
