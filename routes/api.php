@@ -22,6 +22,8 @@ use App\Http\Controllers\BatteryController;
 use App\Http\Controllers\RectifierController;
 use App\Http\Controllers\RectifierItemController;
 use App\Http\Controllers\DcPanelController;
+use App\Http\Controllers\DcPanelItemController;
+use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\AuditController;
 
 /*
@@ -50,7 +52,8 @@ Route::group([
     Route::post('/users2', [UserController::class, 'list']);
     Route::post('/update', [UserController::class, 'update']);
 
-    
+    Route::post('/user/permission', [UserController::class, 'permission']);
+
     Route::get('/export', [UserController::class, 'export']);
 
 });
@@ -131,6 +134,7 @@ Route::group([
 
     Route::get('/v1/site', [SiteController::class, 'findOne']);
     Route::post('/v1/site/list', [SiteController::class, 'getAll']);
+    Route::get('/v1/site/select2', [SiteController::class, 'getAllSelect2']);
     Route::post('/v1/site/save', [SiteController::class, 'store']);
     Route::post('/v1/site/update', [SiteController::class, 'update']);
     Route::post('/v1/site/delete', [SiteController::class, 'remove']);
@@ -146,6 +150,7 @@ Route::group([
     Route::get('/v1/ne/select2', [NetworkElementController::class, 'getAllSelect2']);
     Route::post('/v1/ne/select2', [NetworkElementController::class, 'getAllSelect2']);
     Route::post('/v1/ne/list', [NetworkElementController::class, 'getAll']);
+    Route::post('/v2/ne/list', [NetworkElementController::class, 'getAll2']); //v2
     Route::post('/v1/ne/save', [NetworkElementController::class, 'store']);
     Route::post('/v1/ne/update', [NetworkElementController::class, 'update']);
     Route::post('/v1/ne/delete', [NetworkElementController::class, 'remove']);
@@ -201,12 +206,12 @@ Route::group([
     Route::post('/v1/dc-panel/update', [DcPanelController::class, 'update']);
     Route::post('/v1/dc-panel/delete', [DcPanelController::class, 'remove']);
     
-    // Route::get('/v1/rectifier-item', [RectifierItemController::class, 'findOne']);
-    // Route::post('/v1/rectifier-item/select2', [RectifierItemController::class, 'getAllSelect2']);
-    // Route::post('/v1/rectifier-item/list', [RectifierItemController::class, 'getAll']);
-    // Route::post('/v1/rectifier-item/save', [RectifierItemController::class, 'store']);
-    // Route::post('/v1/rectifier-item/update', [RectifierItemController::class, 'update']);
-    // Route::post('/v1/rectifier-item/delete', [RectifierItemController::class, 'remove']);
+    Route::get('/v1/dc-panel-item', [DcPanelItemController::class, 'findOne']);
+    Route::post('/v1/dc-panel-item/select2', [DcPanelItemController::class, 'getAllSelect2']);
+    Route::post('/v1/dc-panel-item/list', [DcPanelItemController::class, 'getAll']);
+    Route::post('/v1/dc-panel-item/save', [DcPanelItemController::class, 'store']);
+    Route::post('/v1/dc-panel-item/update', [DcPanelItemController::class, 'update']);
+    Route::post('/v1/dc-panel-item/delete', [DcPanelItemController::class, 'remove']);
 
 });
 
@@ -255,6 +260,13 @@ Route::group([
     Route::post('/v1/geo/towns/select2', [GeoController::class, 'getAllTowns']);
     Route::post('/v1/geo/barangays/select2', [GeoController::class, 'getAllBrgys']);
     Route::get('/v1/geo/nothing', [GeoController::class, 'getNothing']);
+
+    Route::get('/v1/manufacturer', [ManufacturerController::class, 'findOne']);
+    Route::get('/v1/manufacturer/select2', [ManufacturerController::class, 'getAllSelect2']);
+    Route::post('/v1/manufacturer/list', [ManufacturerController::class, 'getAll']);
+    Route::post('/v1/manufacturer/save', [ManufacturerController::class, 'store']);
+    Route::post('/v1/manufacturer/update', [ManufacturerController::class, 'update']);
+    Route::post('/v1/manufacturer/delete', [ManufacturerController::class, 'remove']);
 
     Route::post('/v1/organization/center/select2', [OrganizationController::class, 'getAllCenter']);
     Route::post('/v1/organization/division/select2', [OrganizationController::class, 'getAllDivision']);

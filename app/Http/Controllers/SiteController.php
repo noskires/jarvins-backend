@@ -15,8 +15,8 @@ class SiteController extends Controller
 {
     public function getAll(Request $request){
     	try {
-            $user = auth()->userOrFail();
-            $users = Site::select(
+            $resp = auth()->userOrFail();
+            $resp = Site::select(
                 'sites.id',
                 'sites.code',
                 'sites.name',
@@ -77,11 +77,96 @@ class SiteController extends Controller
             ->leftjoin('lib_electric_companies AS ec','ec.id','=','sites.electric_company_code')
             ->leftjoin('lib_pss_owners AS po','po.id','=','sites.pss_owner_code')
             ;
-            return DataTables::of($users)->make(true);
+
+            // return DataTables::of($users)->make(true);
             // return User::all();
+            $dtables = DataTables::eloquent($resp)
+
+            ->filterColumn('category_name', function($query, $keyword) {
+                $sql = "sc.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('address2', function($query, $keyword) {
+                $sql = "CONCAT(
+                    (CASE WHEN (sites.region IS NULL) THEN '' ELSE CONCAT(sites.region,', ') END),
+                    (CASE WHEN (sites.province IS NULL) THEN '' ELSE CONCAT(sites.province,', ') END),
+                    (CASE WHEN (sites.city_municipality IS NULL) THEN '' ELSE CONCAT(sites.city_municipality,', ') END),
+                    (CASE WHEN (sites.brgy IS NULL) THEN '' ELSE CONCAT(sites.brgy,', ') END),
+                    (CASE WHEN (sites.street IS NULL) THEN '' ELSE CONCAT(sites.street) END)
+                ) like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('address', function($query, $keyword) {
+                $sql = "CONCAT(COALESCE(region.name,''),', ', COALESCE(province.name,''),', ', COALESCE(city_municipality.name,''), ', ',COALESCE(brgy.name,''),', ',COALESCE(sites.street,'')) like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('building_name', function($query, $keyword) {
+                $sql = "building.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('exchange_name', function($query, $keyword) {
+                $sql = "exchange.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('electric_company_name', function($query, $keyword) {
+                $sql = "ec.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('electric_company_sin', function($query, $keyword) {
+                $sql = "ec.sin like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('electric_company_meter', function($query, $keyword) {
+                $sql = "ec.meter like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            
+            ->filterColumn('pss_owner_name', function($query, $keyword) {
+                $sql = "po.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            });
+
+            return $dtables->toJson();
+
         } catch(JWTException $e) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+    }
+
+    public function getAllSelect2(Request $request){ 
+
+        $data = array(
+            'id'=>$request->input('id'),
+            'search'=>$request->input('search'),//select2 default
+        );
+
+        $training_code = null;
+        
+        $collection = Site::select(
+            'id AS id',
+            'name AS text',
+        );
+
+        if($data['search']){
+            $collection = $collection->where('name', 'like', '%'.$data['search'].'%');
+        }
+
+        $query = $collection;
+
+        $collection = $collection->get(); 
+
+        return response()->json([
+            'status'=>200,
+            'results'=>$collection,
+        ]);
+
     }
 
     public function findOne(Request $request){

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Permission;
 use DB;
 use DataTables;
 use Auth;
@@ -12,8 +13,14 @@ use JWTAuth;
 use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
+
+
 class UserController extends Controller
 {
+
+    use HasRoles;
 
     public function __construct(){
         $this->user = JWTAuth::parseToken()->authenticate();
@@ -62,6 +69,20 @@ class UserController extends Controller
         return $transaction;
     }
 
+    public function permission(Request $request){
+        // return $id = auth()->user()->id;
+        return Permission::select(
+            'permissions.id',
+            'permissions.user_id',
+            'permissions.permission_id',
+            'lib_permission.permission'
+        )
+        ->leftjoin('lib_permissions AS lib_permission','lib_permission.id','=','permissions.permission_id')
+        ->where('permissions.user_id', auth()->user()->id)
+        ->pluck('lib_permission.permission')->toArray();
+
+    }
+
     function me() {
 
         return $this->user = JWTAuth::parseToken()->authenticate();
@@ -84,4 +105,6 @@ class UserController extends Controller
     {
         return Excel::download(new UsersExport, 'users.xlsx');
     }
+
+
 }

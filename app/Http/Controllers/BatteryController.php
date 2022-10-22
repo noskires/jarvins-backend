@@ -32,7 +32,6 @@ class BatteryController extends Controller
             $resp = Battery::select(
                 'batteries.id',
                 'batteries.code',
-                'batteries.manufacturer',
                 'batteries.index_no',
                 'batteries.model',
                 'batteries.maintainer',
@@ -42,20 +41,32 @@ class BatteryController extends Controller
                 'batteries.capacity',
                 'batteries.type',
                 'batteries.brand',
+                'batteries.individual_cell_voltage',
                 'batteries.no_of_cells',
                 'batteries.cell_status',
                 'batteries.cable_size',
                 'batteries.backup_time',
                 'batteries.float_voltage_requirement',
                 'batteries.remarks',
-                
+                'batteries.rectifier_id',
+                DB::raw("CONCAT(rec_site.code,'RE',rectifier_manufacturer.code,LPAD(rectifier.index_no,3,0),'-',rec_site.name) AS rectifier_name"),
+                DB::raw("CONCAT(rec_site.code,'BA',battery_manufacturer.code,LPAD(batteries.index_no,3,0)) AS battery_name"),
+                'rectifier.site_id AS rec_site_id',
+                'batteries.site_id AS battery_site_id',
+                'battery_site.name AS site_name',
+                'batteries.manufacturer_id AS battery_manufacturer_id',
+                'battery_manufacturer.name AS battery_manufacturer_name'
             )
+            ->leftjoin('rectifiers AS rectifier','rectifier.id','=','batteries.rectifier_id')
+            ->leftjoin('lib_manufacturers AS battery_manufacturer','battery_manufacturer.id','=','batteries.manufacturer_id')
+            ->leftjoin('lib_manufacturers AS rectifier_manufacturer','rectifier_manufacturer.id','=','rectifier.manufacturer_id')
+            // ->leftjoin('sites AS site','site.id','=','rectifier.site_id')
+            ->leftjoin('sites AS rec_site','rec_site.id','=','rectifier.site_id')
+            ->leftjoin('sites AS battery_site','battery_site.id','=','batteries.site_id')
             ;
 
-            // ->leftjoin('network_elements AS ne','ne.code','=','batteries.network_element_code');
-
             $dtables = DataTables::eloquent($resp)
-
+            
             ->filterColumn('network_element_name', function($query, $keyword) {
                 $sql = "ne.name like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
@@ -129,7 +140,9 @@ class BatteryController extends Controller
 
                 $resp = new Battery;
                 $resp->code                 = "BAT-".(string) Str::uuid();
-                $resp->manufacturer         = $fields['manufacturer'];
+                $resp->site_id              = $fields['site_id'];
+                $resp->manufacturer_id      = $fields['manufacturer'];
+                $resp->rectifier_id         = $fields['rectifier'];
                 $resp->index_no             = $fields['index_no'];
                 $resp->model                = $fields['model'];
                 $resp->maintainer           = $fields['maintainer'];
@@ -139,6 +152,7 @@ class BatteryController extends Controller
                 $resp->capacity             = $fields['capacity'];
                 $resp->type                 = $fields['type'];
                 $resp->brand                = $fields['brand'];
+                $resp->individual_cell_voltage = $fields['individual_cell_voltage'];
                 $resp->no_of_cells          = $fields['no_of_cells'];
                 $resp->cell_status          = $fields['cell_status'];
                 $resp->cable_size           = $fields['cable_size'];
@@ -177,7 +191,9 @@ class BatteryController extends Controller
         // try{
 
             $resp = Battery::where('id', $fields['id'])->first();
-            $resp->manufacturer         = $fields['manufacturer'];
+            $resp->site_id              = $fields['site_id'];
+            $resp->manufacturer_id      = $fields['manufacturer'];
+            $resp->rectifier_id         = $fields['rectifier'];
             $resp->index_no             = $fields['index_no'];
             $resp->model                = $fields['model'];
             $resp->maintainer           = $fields['maintainer'];
@@ -187,6 +203,7 @@ class BatteryController extends Controller
             $resp->capacity             = $fields['capacity'];
             $resp->type                 = $fields['type'];
             $resp->brand                = $fields['brand'];
+            $resp->individual_cell_voltage = $fields['individual_cell_voltage'];
             $resp->no_of_cells          = $fields['no_of_cells'];
             $resp->cell_status          = $fields['cell_status'];
             $resp->cable_size           = $fields['cable_size'];

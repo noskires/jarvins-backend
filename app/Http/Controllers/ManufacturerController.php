@@ -8,54 +8,28 @@ use Illuminate\Support\Str;
 
 use Carbon\Carbon;
 
-use App\Models\DcPanelItem;
+use App\Models\Manufacturer;
 
 use DB;
 use DataTables;
 use Auth;
 
 
-class DcPanelItemController extends Controller
+class ManufacturerController extends Controller
 {
     
     public function getAll(Request $request){
 
         $data = array(
             'code'=>$request->input('code'),
-            'dc_panel_id'=>$request->input('dc_panel_id'),
         );
 
     	try {
             $resp = auth()->userOrFail();
 
-            // $resp = DcPanelItem::select('*');
+            $resp = Manufacturer::select('*');
 
-            $resp = DcPanelItem::select(
-                'dc_panel_items.id',
-                'dc_panel_items.code',
-                'dc_panel_items.dc_panel_id',
-                'dc_panel_items.breaker_no',
-                'dc_panel_items.current',
-                'dc_panel_items.ne_id',
-                'ne.name AS ne_name',
-            )
-            ->leftjoin('network_elements as ne','ne.id','=','dc_panel_items.ne_id')
-            ;
-
-            if($data['dc_panel_id']){
-                $resp = $resp->where('dc_panel_items.dc_panel_id', $data['dc_panel_id']);
-            }
-
-
-            $dtables = DataTables::eloquent($resp)
-
-            ->filterColumn('ne_name', function($query, $keyword) {
-                $sql = "ne.name like ?";
-                $query->whereRaw($sql, ["%{$keyword}%"]);
-            });
-            
-            return $dtables->toJson();
-            
+            return DataTables::of($resp)->make(true);
 
         } catch(JWTException $e) {
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -71,9 +45,9 @@ class DcPanelItemController extends Controller
 
         $training_code = null;
         
-        $collection = DcPanelItem::select(
-            'code AS id',
-            'brand AS text',
+        $collection = Manufacturer::select(
+            'id',
+            'name as text',
         );
 
         if($data['search']){
@@ -96,7 +70,7 @@ class DcPanelItemController extends Controller
             'id'=>$request->input('id')
         );
         
-        $resp = DcPanelItem::select('*');
+        $resp = Manufacturer::select('*');
 
         if ($data['id']){
             $resp = $resp->where('id', $data['id']);
@@ -119,14 +93,12 @@ class DcPanelItemController extends Controller
         // $transaction = DB::transaction(function($field) use($fields){
         //     try{
 
-                $resp = new DcPanelItem;
-                $resp->code                 = "PDC-ITM-".(string) Str::uuid();
-                $resp->dc_panel_id          = $fields['dc_panel_id'];
-                $resp->ne_id                = $fields['network_element_id'];
-                $resp->breaker_no           = $fields['breaker_no'];
-                $resp->current              = $fields['current'];
-                $resp->created_by           = Auth::user()->email;
-                $resp->changed_by           = Auth::user()->email;
+                $resp = new Manufacturer;
+                // $resp->code             = "EXH-".(string) Str::uuid();
+                $resp->code             = $fields['code'];
+                $resp->name             = $fields['name'];
+                $resp->created_by       = Auth::user()->email;
+                $resp->changed_by       = Auth::user()->email;
                 $resp->save();
 
                 return response()->json([
@@ -156,12 +128,10 @@ class DcPanelItemController extends Controller
         // $transaction = DB::transaction(function($field) use($fields){
         // try{
 
-            $resp = DcPanelItem::where('id', $fields['id'])->first();
-            $resp->dc_panel_id          = $fields['dc_panel_id'];
-            $resp->ne_id                = $fields['network_element_id'];
-            $resp->breaker_no           = $fields['breaker_no'];
-            $resp->current              = $fields['current'];
-            $resp->changed_by           = Auth::user()->email;
+            $resp = Manufacturer::where('id', $fields['id'])->first();
+            $resp->code             = $fields['code'];
+            $resp->name             = $fields['name'];
+            $resp->changed_by       = Auth::user()->email;
             $resp->save();
 
             return response()->json([
@@ -191,7 +161,7 @@ class DcPanelItemController extends Controller
 	    // $transaction = DB::transaction(function($field) use($fields){
 	    // try{
 
-			DcPanelItem::where('id', $fields['id'])->firstOrFail()->delete();
+			Manufacturer::where('id', $fields['id'])->firstOrFail()->delete();
 
 	        return response()->json([
 	            'status' => 200,

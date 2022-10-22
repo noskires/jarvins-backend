@@ -33,7 +33,6 @@ class RectifierController extends Controller
             $resp = Rectifier::select(
                 'rectifiers.id',
                 'rectifiers.code',
-                'rectifiers.manufacturer',
                 'rectifiers.serial_no',
                 'rectifiers.index_no',
                 'rectifiers.model',
@@ -58,8 +57,14 @@ class RectifierController extends Controller
                 'rectifiers.rectifier_battery_slot',
                 'rectifiers.dcpdb_equipment_load_assignment',
                 'rectifiers.remarks',
-                
-            );
+                'rectifiers.manufacturer_id',
+                'manufacturer.name AS manufacturer_name',
+                'rectifiers.site_id',
+                'site.name AS site_name',
+            )
+            ->leftjoin('lib_manufacturers AS manufacturer','manufacturer.id','=','rectifiers.manufacturer_id')
+            ->leftjoin('sites AS site','site.id','=','rectifiers.site_id')
+            ;
 
             $dtables = DataTables::eloquent($resp);
 
@@ -82,16 +87,19 @@ class RectifierController extends Controller
         $training_code = null;
         
         $collection = Rectifier::select(
-            'id',
-            'name as text',
-        );
+            'rectifiers.id AS id',
+            DB::raw("CONCAT(site.code,'RE',manufacturer.code,LPAD(rectifiers.index_no,3,0),'-',site.name) AS text"),
+        )
+        ->leftjoin('lib_manufacturers AS manufacturer','manufacturer.id','=','rectifiers.manufacturer_id')
+        ->leftjoin('sites AS site','site.id','=','rectifiers.site_id')
+        ;
 
         if($data['search']){
-            $collection = $collection->where('name', 'like', '%'.$data['search'].'%');
+            $collection = $collection->where(DB::raw("CONCAT(site.name,'RE',manufacturer.code)"), 'like', '%'.$data['search'].'%');
         }
 
         $query = $collection;
-
+        
         $collection = $collection->get(); 
 
         return response()->json([
@@ -133,7 +141,8 @@ class RectifierController extends Controller
                 $resp->code                    = "REC-".(string) Str::uuid();
                 // $resp->code                     = $fields['code'];
                 // $resp->network_element_code     = $fields['network_element_code'];
-                $resp->manufacturer             = $fields['manufacturer'];
+                $resp->site_id                  = $fields['site_id'];
+                $resp->manufacturer_id          = $fields['manufacturer'];
                 $resp->serial_no                = $fields['serial_no'];
                 $resp->index_no                 = $fields['index_no'];
                 $resp->model                    = $fields['model'];
@@ -164,29 +173,29 @@ class RectifierController extends Controller
 
 
                 
-                for($i = 0; $i < count($fields['network_element_code']); $i++) {
+                // for($i = 0; $i < count($fields['network_element_code']); $i++) {
         
-                    $respItem = new RectifierItem;
-                    $respItem->code                     = "REC-ITM".(string) Str::uuid();
-                    $respItem->rectifier_code           = $resp->code;
-                    $respItem->item_code                = $fields['network_element_code'][$i];
-                    $respItem->item_type                = "Network Element";
-                    $respItem->created_by               = Auth::user()->email;
-                    $respItem->changed_by               = Auth::user()->email;
-                    $respItem->save();
-                }
+                //     $respItem = new RectifierItem;
+                //     $respItem->code                     = "REC-ITM".(string) Str::uuid();
+                //     $respItem->rectifier_code           = $resp->code;
+                //     $respItem->item_code                = $fields['network_element_code'][$i];
+                //     $respItem->item_type                = "Network Element";
+                //     $respItem->created_by               = Auth::user()->email;
+                //     $respItem->changed_by               = Auth::user()->email;
+                //     $respItem->save();
+                // }
 
-                for($i = 0; $i < count($fields['battery_code']); $i++) {
+                // for($i = 0; $i < count($fields['battery_code']); $i++) {
         
-                    $respItem = new RectifierItem;
-                    $respItem->code                     = "REC-ITM".(string) Str::uuid();
-                    $respItem->rectifier_code           = $resp->code;
-                    $respItem->item_code                = $fields['battery_code'][$i];
-                    $respItem->item_type                = "Battery";
-                    $respItem->created_by               = Auth::user()->email;
-                    $respItem->changed_by               = Auth::user()->email;
-                    $respItem->save();
-                }
+                //     $respItem = new RectifierItem;
+                //     $respItem->code                     = "REC-ITM".(string) Str::uuid();
+                //     $respItem->rectifier_code           = $resp->code;
+                //     $respItem->item_code                = $fields['battery_code'][$i];
+                //     $respItem->item_type                = "Battery";
+                //     $respItem->created_by               = Auth::user()->email;
+                //     $respItem->changed_by               = Auth::user()->email;
+                //     $respItem->save();
+                // }
 
 
                 
@@ -221,7 +230,8 @@ class RectifierController extends Controller
             $resp = Rectifier::where('id', $fields['id'])->first();
             // $resp->code                     = $fields['code'];
             // $resp->network_element_code     = $fields['network_element_code'];
-            $resp->manufacturer             = $fields['manufacturer'];
+            $resp->site_id                  = $fields['site_id'];
+            $resp->manufacturer_id          = $fields['manufacturer'];
             $resp->serial_no                = $fields['serial_no'];
             $resp->index_no                 = $fields['index_no'];
             $resp->model                    = $fields['model'];
@@ -246,55 +256,61 @@ class RectifierController extends Controller
             $resp->rectifier_battery_slot   = $fields['rectifier_battery_slot'];
             $resp->dcpdb_equipment_load_assignment = $fields['dcpdb_equipment_load_assignment'];
             $resp->remarks                  = $fields['remarks'];
-            $resp->changed_by       = Auth::user()->email;
+            $resp->changed_by               = Auth::user()->email;
             $resp->save();
 
-            $rectifierItemsNe = RectifierItem::select('item_code')->where('rectifier_code', $fields['code'])->where('item_type','Network Element')->pluck('item_code')->toArray();
-            $rectifierItemsBattery = RectifierItem::select('item_code')->where('rectifier_code', $fields['code'])->where('item_type','Battery')->pluck('item_code')->toArray();
+            return response()->json([
+                'status' => 200,
+                'data' => null,
+                'message' => 'Successfully updated.'
+            ]);
 
-            $ne_for_addition = array_values(array_diff($fields['network_element_code'], $rectifierItemsNe));
-            $ne_for_deletion = array_values(array_diff($rectifierItemsNe, $fields['network_element_code']));
+            // $rectifierItemsNe = RectifierItem::select('item_code')->where('rectifier_code', $fields['code'])->where('item_type','Network Element')->pluck('item_code')->toArray();
+            // $rectifierItemsBattery = RectifierItem::select('item_code')->where('rectifier_code', $fields['code'])->where('item_type','Battery')->pluck('item_code')->toArray();
 
-            $battery_for_addition = array_values(array_diff($fields['battery_code'], $rectifierItemsBattery));
-            $battery_for_deletion = array_values(array_diff($rectifierItemsBattery, $fields['battery_code']));
+            // $ne_for_addition = array_values(array_diff($fields['network_element_code'], $rectifierItemsNe));
+            // $ne_for_deletion = array_values(array_diff($rectifierItemsNe, $fields['network_element_code']));
+
+            // $battery_for_addition = array_values(array_diff($fields['battery_code'], $rectifierItemsBattery));
+            // $battery_for_deletion = array_values(array_diff($rectifierItemsBattery, $fields['battery_code']));
 
             // if(count($ne_for_addition)>0){
 
-                for($i = 0; $i < count($ne_for_addition); $i++) {
+                // for($i = 0; $i < count($ne_for_addition); $i++) {
 
-                    $respItem = new RectifierItem;
-                    $respItem->code                     = "REC-ITM".(string) Str::uuid();
-                    $respItem->rectifier_code           = $resp->code;
-                    $respItem->item_code                = $ne_for_addition[$i];
-                    $respItem->item_type                = "Network Element";
-                    $respItem->created_by               = Auth::user()->email;
-                    $respItem->changed_by               = Auth::user()->email;
-                    $respItem->save();
-                }
+                //     $respItem = new RectifierItem;
+                //     $respItem->code                     = "REC-ITM".(string) Str::uuid();
+                //     $respItem->rectifier_code           = $resp->code;
+                //     $respItem->item_code                = $ne_for_addition[$i];
+                //     $respItem->item_type                = "Network Element";
+                //     $respItem->created_by               = Auth::user()->email;
+                //     $respItem->changed_by               = Auth::user()->email;
+                //     $respItem->save();
+                // }
             // }
 
             // if(count($ne_for_deletion)>0){
 
-                for($i = 0; $i < count($ne_for_deletion); $i++) {
-                    RectifierItem::where('rectifier_code', $fields['code'])->where('item_code', $ne_for_deletion[$i])->firstOrFail()->delete();
-                }
+                // for($i = 0; $i < count($ne_for_deletion); $i++) {
+                //     RectifierItem::where('rectifier_code', $fields['code'])->where('item_code', $ne_for_deletion[$i])->firstOrFail()->delete();
+                // }
             // }
             
-            for($i = 0; $i < count($battery_for_addition); $i++) {
+            // for($i = 0; $i < count($battery_for_addition); $i++) {
         
-                $respItem = new RectifierItem;
-                $respItem->code                     = "REC-ITM".(string) Str::uuid();
-                $respItem->rectifier_code           = $resp->code;
-                $respItem->item_code                = $battery_for_addition[$i];
-                $respItem->item_type                = "Battery";
-                $respItem->created_by               = Auth::user()->email;
-                $respItem->changed_by               = Auth::user()->email;
-                $respItem->save();
-            }
+            //     $respItem = new RectifierItem;
+            //     $respItem->code                     = "REC-ITM".(string) Str::uuid();
+            //     $respItem->rectifier_code           = $resp->code;
+            //     $respItem->item_code                = $battery_for_addition[$i];
+            //     $respItem->item_type                = "Battery";
+            //     $respItem->created_by               = Auth::user()->email;
+            //     $respItem->changed_by               = Auth::user()->email;
+            //     $respItem->save();
+            // }
 
-            for($i = 0; $i < count($battery_for_deletion); $i++) {
-                RectifierItem::where('rectifier_code', $fields['code'])->where('item_code', $battery_for_deletion[$i])->firstOrFail()->delete();
-            }
+            // for($i = 0; $i < count($battery_for_deletion); $i++) {
+            //     RectifierItem::where('rectifier_code', $fields['code'])->where('item_code', $battery_for_deletion[$i])->firstOrFail()->delete();
+            // }
 
 // $array1 = array("a" => "sky", "star", "moon", "cloud", "moon");
 // $array2 = array("b" => "sky", "sun", "moon");
@@ -318,11 +334,7 @@ class RectifierController extends Controller
 // // [0] => sun
 // // )
 
-            return response()->json([
-                'status' => 200,
-                'data' => null,
-                'message' => 'Successfully updated.'
-            ]);
+            
 
         //   }
         //   catch (\Exception $e) 

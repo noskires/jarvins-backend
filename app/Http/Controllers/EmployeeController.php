@@ -20,12 +20,16 @@ use PSGC\Facades\Region;
 use App\Exports\EmployeesExport;
 use Maatwebsite\Excel\Facades\Excel;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Traits\HasRoles;
 
 
 class EmployeeController extends Controller
 {
+    use HasRoles;
+
     public function __construct(){
         $this->user = JWTAuth::parseToken()->authenticate();
     }
@@ -395,14 +399,16 @@ class EmployeeController extends Controller
 
     public function createAndAssignRoles() {
 
-        $var1 = 29;
+        $var1 = 5;
         $role = Role::create(['name' => 'user'.$var1]);
         $permission = Permission::create(['name' => 'edit'.$var1]);
-    
-
-        $user = User::where('id', 1)->first();
-        $role = Role::findById($var1-3);
         
+        $user = User::where('id', 1)->first();
+        $role = Role::findById(29);
+        $permission = Permission::findById(28);
+        
+        $role->givePermissionTo($permission);
+        // $user->assignPermission($permission);
         $user->assignRole($role);
 
         // Event::dispatch(AuditCustom::class, [$user]);
@@ -410,6 +416,13 @@ class EmployeeController extends Controller
     }
 
     public function getRoles() {
+
+        $permissions = auth()->user()?->role()->with('permissions')->get()
+    ->pluck('permissions')
+    ->flatten()
+    ->pluck('name')
+    ->toArray();
+return $permissions;
 
         // $role = Role::create(['name' => 'user5']);
         // $permission = Permission::create(['name' => 'edit5']);
@@ -420,7 +433,21 @@ class EmployeeController extends Controller
         // $user->assignRole($role);
         
         // return $permissions = $user->permissions;
-        return $permissions = $user->getDirectPermissions();
+        // return $permissions = $user->getDirectPermissions();
+
+        // return $roles = $user->getRoleNames();
+
+
+        // return Auth::user()->hasPermissionTo('edit3');
+
+        return $users = Auth::user()->with('roles')->get();
+        // return $user = Auth::user()->with(['permissions', 'roles'])->get();
+        // return Auth::user()->getAllPermissions();
+
+        // return Auth::user()->hasPermission(['edit1']);
+        return Auth::user()->hasRole(['user2']);
+
+        return  Auth::user()->hasAllRoles(Role::all());
 
     }
 
@@ -436,10 +463,5 @@ class EmployeeController extends Controller
         $user->assignRole($role);
 
     }
-
-    
-
-      
-
 
 }

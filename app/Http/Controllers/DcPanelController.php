@@ -32,7 +32,6 @@ class DcPanelController extends Controller
             $resp = DcPanel::select(
                 'dc_panels.id',
                 'dc_panels.code',
-                'dc_panels.manufacturer',
                 'dc_panels.index_no',
                 'dc_panels.model',
                 'dc_panels.maintainer',
@@ -48,7 +47,23 @@ class DcPanelController extends Controller
                 'dc_panels.status_of_breakers',
                 'dc_panels.date_accepted',
                 'dc_panels.remarks',
+                DB::raw("CONCAT(rec_site.code,'DC',dc_panel_manufacturer.code,LPAD(dc_panels.index_no,3,0)) AS dc_panel_name"),
+                'dc_panels.rectifier_id',
+                DB::raw("CONCAT(rec_site.code,'RE',rec_manufacturer.code,LPAD(rectifier.index_no,3,0),'-',rec_site.name) AS rectifier_name"),
+                // 'rectifier.manufacturer_id as rectifier_id',
+                // 'rec_manufacturer.name AS rectifier_manufacturer',
+                'dc_panels.manufacturer_id',
+                'dc_panel_manufacturer.name AS manufacturer_name',
+                'dc_panels.site_id AS dc_panel_site_id',
+                'rectifier.site_id AS rectifier_site_id',
+                // 'rec_site.name as site_name',
+                'dc_panel_site.name as site_name',
             )
+            ->leftjoin('rectifiers as rectifier','rectifier.id','=','dc_panels.rectifier_id')
+            ->leftjoin('lib_manufacturers AS rec_manufacturer','rec_manufacturer.id','=','rectifier.manufacturer_id')
+            ->leftjoin('lib_manufacturers AS dc_panel_manufacturer','dc_panel_manufacturer.id','=','dc_panels.manufacturer_id')
+            ->leftjoin('sites AS rec_site','rec_site.id','=','rectifier.site_id')
+            ->leftjoin('sites AS dc_panel_site','dc_panel_site.id','=','dc_panels.site_id')
             ;
 
 
@@ -125,7 +140,9 @@ class DcPanelController extends Controller
 
                 $resp = new DcPanel;
                 $resp->code                 = "PDC-".(string) Str::uuid();
-                $resp->manufacturer         = $fields['manufacturer'];
+                $resp->site_id              = $fields['site_id'];
+                $resp->rectifier_id         = $fields['rectifier'];
+                $resp->manufacturer_id      = $fields['manufacturer'];
                 $resp->index_no             = $fields['index_no'];
                 $resp->model                = $fields['model'];
                 $resp->maintainer           = $fields['maintainer'];
@@ -172,7 +189,9 @@ class DcPanelController extends Controller
         // try{
 
             $resp = DcPanel::where('id', $fields['id'])->first();
-            $resp->manufacturer         = $fields['manufacturer'];
+            $resp->site_id              = $fields['site_id'];
+            $resp->rectifier_id         = $fields['rectifier'];
+            $resp->manufacturer_id      = $fields['manufacturer'];
             $resp->index_no             = $fields['index_no'];
             $resp->model                = $fields['model'];
             $resp->maintainer           = $fields['maintainer'];
