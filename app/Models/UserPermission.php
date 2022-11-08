@@ -8,7 +8,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 use Altek\Accountant\Contracts\Recordable;
 
-class Permission extends Model implements Auditable{
+class UserPermission extends Model implements Auditable{
 
     use \OwenIt\Auditing\Auditable;
     // use \Altek\Accountant\Recordable;
@@ -16,5 +16,9 @@ class Permission extends Model implements Auditable{
     use HasFactory;
 
     protected $primaryKey = 'id';
-    protected $table = "lib_permissions";
+    protected $table = "permissions";
+
+    protected $casts = [
+        'id' => 'string'
+    ];
 }

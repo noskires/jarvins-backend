@@ -25,6 +25,8 @@ use App\Http\Controllers\DcPanelController;
 use App\Http\Controllers\DcPanelItemController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\UserItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,13 +50,21 @@ Route::group([
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
 
     Route::get('/users', [UserController::class, 'list']);
+    Route::post('/users2', [UserController::class, 'list2']);
     Route::get('/me', [UserController::class, 'me']);
-    Route::post('/users2', [UserController::class, 'list']);
-    Route::post('/update', [UserController::class, 'update']);
+    Route::post('/user/update', [UserController::class, 'update']);
+    Route::post('/user/save', [UserController::class, 'store']);
+    Route::post('/user/delete', [UserController::class, 'remove']);
 
     Route::post('/user/permission', [UserController::class, 'permission']);
 
     Route::get('/export', [UserController::class, 'export']);
+
+
+    Route::post('/user-item/list', [UserItemController::class, 'getAll']);
+    Route::post('/user-item/update', [UserItemController::class, 'update']);
+    Route::post('/user-item/save', [UserItemController::class, 'store']);
+    Route::post('/user-item/delete', [UserItemController::class, 'remove']);
 
 });
 
@@ -267,6 +277,13 @@ Route::group([
     Route::post('/v1/manufacturer/save', [ManufacturerController::class, 'store']);
     Route::post('/v1/manufacturer/update', [ManufacturerController::class, 'update']);
     Route::post('/v1/manufacturer/delete', [ManufacturerController::class, 'remove']);
+
+    Route::get('/v1/permission', [PermissionController::class, 'findOne']);
+    Route::get('/v1/permission/select2', [PermissionController::class, 'getAllSelect2']);
+    Route::post('/v1/permission/list', [PermissionController::class, 'getAll']);
+    Route::post('/v1/permission/save', [PermissionController::class, 'store']);
+    Route::post('/v1/permission/update', [PermissionController::class, 'update']);
+    Route::post('/v1/permission/delete', [PermissionController::class, 'remove']);
 
     Route::post('/v1/organization/center/select2', [OrganizationController::class, 'getAllCenter']);
     Route::post('/v1/organization/division/select2', [OrganizationController::class, 'getAllDivision']);

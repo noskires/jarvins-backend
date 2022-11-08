@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Permission;
+use App\Models\UserPermission;
 use DB;
 use DataTables;
 use Auth;
@@ -37,6 +37,54 @@ class UserController extends Controller
         }
     }
 
+    public function list2(Request $request){
+    	try {
+            $user = auth()->userOrFail();
+            $users = User::select('*');
+            return DataTables::of($users)->make(true);
+            // return User::all();
+        } catch(JWTException $e) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+
+    public function store(Request $request){
+
+        $fields = $request->all();
+        
+        // $transaction = DB::transaction(function($field) use($fields){
+        //     try{
+
+                $resp = new User;
+                $resp->name             = $fields['name'];
+                $resp->email            = $fields['email'];
+                $resp->password         = $fields['password'];
+                $resp->section_id       = $fields['section_id'];
+                $resp->is_admin         = $fields['is_admin'];
+                $resp->created_by       = Auth::user()->email;
+                $resp->changed_by       = Auth::user()->email;
+                $resp->save();
+
+                return response()->json([
+                    'status' => 200,
+                    'data' => null,
+                    'message' => 'Successfully saved.'
+                ]);
+
+        //     }
+        //     catch (\Exception $e) 
+        //     {
+        //         return response()->json([
+        //             'status' => 500,
+        //             'data' => null,
+        //             'message' => 'Error, please try again!'
+        //         ]);
+        //     }
+        // });
+
+        return $transaction;
+    }
+
     public function update(Request $request){
 
         $fields = $request->all();
@@ -45,8 +93,10 @@ class UserController extends Controller
         try{
 
             $user = User::where('id', $fields['id'])->first();
-            $user->name         = $fields['name'];
-            $user->email         = $fields['email'];
+            $user->name             = $fields['name'];
+            $user->email            = $fields['email'];
+            $user->section_id       = $fields['section_id'];
+            $user->is_admin         = $fields['is_admin'];
             $user->save();
 
             return response()->json([
@@ -69,9 +119,38 @@ class UserController extends Controller
         return $transaction;
     }
 
+    public function remove(Request $request){
+
+	    $fields = $request->all();
+
+	    // $transaction = DB::transaction(function($field) use($fields){
+	    // try{
+
+			User::where('id', $fields['id'])->firstOrFail()->delete();
+
+	        return response()->json([
+	            'status' => 200,
+	            'data' => 'null',
+	            'message' => 'Successfully deleted.'
+	        ]);
+
+	    //   }
+	    //   catch (\Exception $e) 
+	    //   {
+	    //       return response()->json([
+	    //         'status' => 500,
+	    //         'data' => 'null',
+	    //         'message' => 'Error, please try again!'
+	    //     ]);
+	    //   }
+	    // });
+
+   	 	return $transaction;
+  	}
+
     public function permission(Request $request){
         // return $id = auth()->user()->id;
-        return Permission::select(
+        return UserPermission::select(
             'permissions.id',
             'permissions.user_id',
             'permissions.permission_id',
