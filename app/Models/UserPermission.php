@@ -19,6 +19,8 @@ class UserPermission extends Model implements Auditable{
     protected $table = "permissions";
 
     protected $casts = [
-        'id' => 'string'
+        // 'id' => 'string'
     ];
+
+    // public $timestamps = false;
 }

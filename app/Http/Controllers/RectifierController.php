@@ -66,7 +66,18 @@ class RectifierController extends Controller
             ->leftjoin('sites AS site','site.id','=','rectifiers.site_id')
             ;
 
-            $dtables = DataTables::eloquent($resp);
+            $dtables = DataTables::eloquent($resp)
+
+            ->filterColumn('site_name', function($query, $keyword) {
+                $sql = "site.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('manufacturer_name', function($query, $keyword) {
+                $sql = "manufacturer.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ;
 
             return $dtables->toJson();
 

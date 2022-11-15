@@ -37,7 +37,7 @@ class PermissionController extends Controller
     }
 
     public function getAllSelect2(Request $request){ 
-
+ 
         $data = array(
             'id'=>$request->input('id'),
             'user_id'=>$request->input('user_id'),
@@ -49,16 +49,29 @@ class PermissionController extends Controller
         $collection = Permission::select(
             'id',
             'permission as text',
+
         );
+
+        // if($data['user_id']){
+        //     $collection = $collection->where(DB::raw(
+        //     "CASE 
+        //     // WHEN
+        //     //     (SELECT COALESCE(COUNT(user_id), 0) 
+        //     //     FROM permissions AS permission 
+        //     //     WHERE permission.permission_id = lib_permissions.id) > 1
+        //     // THEN 'YES' 
+        //     WHEN 
+        //         (SELECT COALESCE(COUNT(user_id), 0) 
+        //         FROM permissions AS permission 
+        //         WHERE permission.permission_id = lib_permissions.id AND permission.user_id = '".$data['user_id']."') > 0 
+        //     THEN 'YES' 
+        //     ELSE 'NO' END"), "NO"); 
+        // }
 
         if($data['user_id']){
             $collection = $collection->where(DB::raw(
             "CASE 
-            WHEN
-                (SELECT COALESCE(COUNT(user_id), 0) 
-                FROM permissions AS permission 
-                WHERE permission.permission_id = lib_permissions.id) > 1
-            THEN 'YES' 
+         
             WHEN 
                 (SELECT COALESCE(COUNT(user_id), 0) 
                 FROM permissions AS permission 

@@ -28,10 +28,25 @@ class UserController extends Controller
 
     public function list(Request $request){
     	try {
-            $user = auth()->userOrFail();
-            $users = User::select('*');
-            return DataTables::of($users)->make(true);
+            $resp = auth()->userOrFail();
+            $resp = User::select(
+                '*'
+                // 'users.id',
+                // 'users.email',
+                // 'users.email',
+            );
+            // return DataTables::of($users)->make(true);
             // return User::all();
+
+            $dtables = DataTables::eloquent($resp)
+
+            ->filterColumn('users.name', function($query, $keyword) {
+                $sql = "users.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            });
+
+            return $dtables->toJson();
+
         } catch(JWTException $e) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }

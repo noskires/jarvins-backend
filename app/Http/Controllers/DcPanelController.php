@@ -69,10 +69,21 @@ class DcPanelController extends Controller
 
             $dtables = DataTables::eloquent($resp)
 
-            // ->filterColumn('network_element_name', function($query, $keyword) {
-            //     $sql = "ne.name like ?";
-            //     $query->whereRaw($sql, ["%{$keyword}%"]);
-            // });
+            ->filterColumn('site_name', function($query, $keyword) {
+                $sql = "dc_panel_site.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('rectifier_name', function($query, $keyword) {
+                $sql = "CONCAT(rec_site.code,'RE',rec_manufacturer.code,LPAD(rectifier.index_no,3,0),'-',rec_site.name) like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('manufacturer_name', function($query, $keyword) {
+                $sql = "dc_panel_manufacturer.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            
             ;
             return $dtables->toJson();
 
