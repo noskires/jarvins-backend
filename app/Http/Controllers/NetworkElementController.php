@@ -42,9 +42,13 @@ class NetworkElementController extends Controller
                 'network_elements.device_ip_address',
                 'network_elements.software_version',
                 'network_elements.foc_assignment_uplink1',
+                'network_elements.foc_assignment_cid1',
                 'network_elements.hon_assignment_uplink_port1',
+                'network_elements.homing_node1',
                 'network_elements.foc_assignment_uplink2',
+                'network_elements.foc_assignment_cid2',
                 'network_elements.hon_assignment_uplink_port2',
+                'network_elements.homing_node2',
                 'network_elements.decom_date',
                 'network_elements.new_node_name',
                 'site.name AS site_name',
@@ -181,9 +185,13 @@ class NetworkElementController extends Controller
                 $resp->device_ip_address             = $fields['device_ip_address'];
                 $resp->software_version              = $fields['software_version'];
                 $resp->foc_assignment_uplink1        = $fields['foc_assignment_uplink1'];
+                $resp->foc_assignment_cid1           = $fields['foc_assignment_cid1'];
                 $resp->foc_assignment_uplink2        = $fields['foc_assignment_uplink2'];
+                $resp->foc_assignment_cid2           = $fields['foc_assignment_cid2'];
                 $resp->hon_assignment_uplink_port1   = $fields['hon_assignment_uplink_port1'];
+                $resp->homing_node1                  = $fields['homing_node1'];
                 $resp->hon_assignment_uplink_port2   = $fields['hon_assignment_uplink_port2'];
+                $resp->homing_node2                  = $fields['homing_node2'];
                 $resp->decom_date                    = $fields['decom_date'];
                 $resp->new_node_name                 = $fields['new_node_name'];
                 $resp->created_by                    = Auth::user()->email;
@@ -227,9 +235,13 @@ class NetworkElementController extends Controller
             $resp->device_ip_address             = $fields['device_ip_address'];
             $resp->software_version              = $fields['software_version'];
             $resp->foc_assignment_uplink1        = $fields['foc_assignment_uplink1'];
+            $resp->foc_assignment_cid1           = $fields['foc_assignment_cid1'];
             $resp->foc_assignment_uplink2        = $fields['foc_assignment_uplink2'];
+            $resp->foc_assignment_cid2           = $fields['foc_assignment_cid2'];
             $resp->hon_assignment_uplink_port1   = $fields['hon_assignment_uplink_port1'];
+            $resp->homing_node1                  = $fields['homing_node1'];
             $resp->hon_assignment_uplink_port2   = $fields['hon_assignment_uplink_port2'];
+            $resp->homing_node2                  = $fields['homing_node2'];
             $resp->decom_date                    = $fields['decom_date'];
             $resp->new_node_name                 = $fields['new_node_name'];
             $resp->changed_by       = Auth::user()->email;
