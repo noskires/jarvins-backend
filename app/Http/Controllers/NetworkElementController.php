@@ -13,6 +13,7 @@ use App\Models\NetworkElement;
 use DB;
 use DataTables;
 use Auth;
+use Validator;
 
 
 class NetworkElementController extends Controller
@@ -36,9 +37,9 @@ class NetworkElementController extends Controller
                 'network_elements.code',
                 'network_elements.name',
                 'network_elements.site_id',
-                'network_elements.type',
+                'network_elements.type_id',
                 'network_elements.status',
-                'network_elements.vendor',
+                'network_elements.vendor_id',
                 'network_elements.device_ip_address',
                 'network_elements.software_version',
                 'network_elements.foc_assignment_uplink1',
@@ -51,8 +52,13 @@ class NetworkElementController extends Controller
                 'network_elements.homing_node2',
                 'network_elements.decom_date',
                 'network_elements.new_node_name',
-                'site.name AS site_name',
-            )->leftjoin('sites AS site','site.id','=','network_elements.site_id')
+                DB::raw("CONCAT(site.code, '-', site.name) AS site_name"),
+                'subdomain.name AS type_name',
+                'manufacturer.name AS vendor_name',
+            )
+            ->leftjoin('sites AS site','site.id','=','network_elements.site_id')
+            ->leftjoin('lib_subdomains AS subdomain','subdomain.id','=','network_elements.type_id')
+            ->leftjoin('lib_manufacturers AS manufacturer','manufacturer.id','=','network_elements.vendor_id')
             ;
 
             $dtables = DataTables::eloquent($resp);
@@ -171,49 +177,91 @@ class NetworkElementController extends Controller
 
         $fields = $request->all();
         
-        // $transaction = DB::transaction(function($field) use($fields){
-        //     try{
+        $transaction = DB::transaction(function($field) use($fields){
+            try{
 
-                $resp = new NetworkElement;
-                // $resp->code             = "NET-".(string) Str::uuid();
-                $resp->code                          = $fields['code'];
-                $resp->site_id                       = $fields['site_id'];
-                $resp->name                          = $fields['name'];
-                $resp->type                          = $fields['type'];
-                $resp->status                        = $fields['status'];
-                $resp->vendor                        = $fields['vendor'];
-                $resp->device_ip_address             = $fields['device_ip_address'];
-                $resp->software_version              = $fields['software_version'];
-                $resp->foc_assignment_uplink1        = $fields['foc_assignment_uplink1'];
-                $resp->foc_assignment_cid1           = $fields['foc_assignment_cid1'];
-                $resp->foc_assignment_uplink2        = $fields['foc_assignment_uplink2'];
-                $resp->foc_assignment_cid2           = $fields['foc_assignment_cid2'];
-                $resp->hon_assignment_uplink_port1   = $fields['hon_assignment_uplink_port1'];
-                $resp->homing_node1                  = $fields['homing_node1'];
-                $resp->hon_assignment_uplink_port2   = $fields['hon_assignment_uplink_port2'];
-                $resp->homing_node2                  = $fields['homing_node2'];
-                $resp->decom_date                    = $fields['decom_date'];
-                $resp->new_node_name                 = $fields['new_node_name'];
-                $resp->created_by                    = Auth::user()->email;
-                $resp->changed_by                    = Auth::user()->email;
-                $resp->save();
+                $validator = Validator::make($fields, [
+                    'code' => 'required|string|max:50|unique:network_elements',
+                    'name' => 'required|string',
+                    'type_id' => 'required|string',
+                    'status' => 'required|string',
+                    'vendor_id' => 'required|string',
+                ]);
+
+                // if($validator->fails()){
+                //     return response()->json($validator->errors(), 400);
+                // } 
+
+                // $resp = new NetworkElement;
+
+                $resp = NetworkElement::create(array_merge(
+                    $validator->validated(),
+                    [
+                        // $resp->code                          = $fields['code'],
+                        // $resp->site_id                       = $fields['site_id'],
+                        // $resp->name                          = $fields['name'],
+                        // $resp->type                          = $fields['type'],
+                        // $resp->status                        = $fields['status'],
+                        // $resp->vendor                        = $fields['vendor'],
+                        // $resp->device_ip_address             = $fields['device_ip_address'],
+                        // $resp->software_version              = $fields['software_version'],
+                        // $resp->foc_assignment_uplink1        = $fields['foc_assignment_uplink1'],
+                        // $resp->foc_assignment_cid1           = $fields['foc_assignment_cid1'],
+                        // $resp->foc_assignment_uplink2        = $fields['foc_assignment_uplink2'],
+                        // $resp->foc_assignment_cid2           = $fields['foc_assignment_cid2'],
+                        // $resp->hon_assignment_uplink_port1   = $fields['hon_assignment_uplink_port1'],
+                        // $resp->homing_node1                  = $fields['homing_node1'],
+                        // $resp->hon_assignment_uplink_port2   = $fields['hon_assignment_uplink_port2'],
+                        // $resp->homing_node2                  = $fields['homing_node2'],
+                        // $resp->decom_date                    = $fields['decom_date'],
+                        // $resp->new_node_name                 = $fields['new_node_name'],
+                        // $resp->created_by                    = Auth::user()->email,
+                        // $resp->changed_by                    = Auth::user()->email,
+
+                        // 'code'                          => $fields['code'],
+                        'site_id'                       => $fields['site_id'],
+                        'name'                          => $fields['name'],
+                        'type_id'                       => $fields['type_id'],
+                        'status'                        => $fields['status'],
+                        'vendor_id'                     => $fields['vendor_id'],
+                        'device_ip_address'             => $fields['device_ip_address'],
+                        'software_version'              => $fields['software_version'],
+                        'foc_assignment_uplink1'        => $fields['foc_assignment_uplink1'],
+                        'foc_assignment_cid1'           => $fields['foc_assignment_cid1'],
+                        'foc_assignment_uplink2'        => $fields['foc_assignment_uplink2'],
+                        'foc_assignment_cid2'           => $fields['foc_assignment_cid2'],
+                        'hon_assignment_uplink_port1'   => $fields['hon_assignment_uplink_port1'],
+                        'homing_node1'                  => $fields['homing_node1'],
+                        'hon_assignment_uplink_port2'   => $fields['hon_assignment_uplink_port2'],
+                        'homing_node2'                  => $fields['homing_node2'],
+                        'decom_date'                    => $fields['decom_date'],
+                        'new_node_name'                 => $fields['new_node_name'],
+                        'created_by'                    => Auth::user()->email,
+                        'changed_by'                    => Auth::user()->email,
+                    ])
+                );
+                    // $resp->save();
 
                 return response()->json([
                     'status' => 200,
                     'data' => null,
                     'message' => 'Successfully saved.'
-                ]);
+                ], 200);
 
-        //     }
-        //     catch (\Exception $e) 
-        //     {
-        //         return response()->json([
-        //             'status' => 500,
-        //             'data' => null,
-        //             'message' => 'Error, please try again!'
-        //         ]);
-        //     }
-        // });
+            }
+            // catch (\Exception $e) 
+            catch (\ValidationException $e) 
+            {
+           
+                
+                return response()->json([
+                    'status' => 400,
+                    'data' => null,
+                    'message' => 'Error, please try again!',
+                    'errors' => $e->errors(),
+                ], 404);
+            }
+        });
 
         return $transaction;
     }
@@ -229,9 +277,9 @@ class NetworkElementController extends Controller
             $resp->code                          = $fields['code'];
             $resp->site_id                       = $fields['site_id'];
             $resp->name                          = $fields['name'];
-            $resp->type                          = $fields['type'];
+            $resp->type_id                       = $fields['type_id'];
             $resp->status                        = $fields['status'];
-            $resp->vendor                        = $fields['vendor'];
+            $resp->vendor_id                     = $fields['vendor_id'];
             $resp->device_ip_address             = $fields['device_ip_address'];
             $resp->software_version              = $fields['software_version'];
             $resp->foc_assignment_uplink1        = $fields['foc_assignment_uplink1'];

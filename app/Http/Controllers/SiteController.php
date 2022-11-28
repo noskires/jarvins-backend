@@ -151,11 +151,14 @@ class SiteController extends Controller
         
         $collection = Site::select(
             'id AS id',
-            'name AS text',
+            // 'name AS text',
+            DB::raw("CONCAT(code, '-', name) as text"),
         );
 
         if($data['search']){
-            $collection = $collection->where('name', 'like', '%'.$data['search'].'%');
+            $collection = $collection->where(
+                DB::raw("CONCAT(code, '-', name) ")
+                , 'like', '%'.$data['search'].'%');
         }
 
         $query = $collection;

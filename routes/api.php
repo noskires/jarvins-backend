@@ -27,6 +27,7 @@ use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserItemController;
+use App\Http\Controllers\SubdomainController;
 
 /*
 |--------------------------------------------------------------------------
@@ -284,6 +285,13 @@ Route::group([
     Route::post('/v1/permission/save', [PermissionController::class, 'store']);
     Route::post('/v1/permission/update', [PermissionController::class, 'update']);
     Route::post('/v1/permission/delete', [PermissionController::class, 'remove']);
+
+    Route::get('/v1/subdomain', [SubdomainController::class, 'findOne']);
+    Route::get('/v1/subdomain/select2', [SubdomainController::class, 'getAllSelect2']);
+    Route::post('/v1/subdomain/list', [SubdomainController::class, 'getAll']);
+    Route::post('/v1/subdomain/save', [SubdomainController::class, 'store']);
+    Route::post('/v1/subdomain/update', [SubdomainController::class, 'update']);
+    Route::post('/v1/subdomain/delete', [SubdomainController::class, 'remove']);
 
     Route::post('/v1/organization/center/select2', [OrganizationController::class, 'getAllCenter']);
     Route::post('/v1/organization/division/select2', [OrganizationController::class, 'getAllDivision']);
